@@ -150,6 +150,7 @@ impl Drop for WorkDir {
     }
 }
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait Sandbox: Send + Sync {
     async fn run(&self, cmd: SandboxCommand, ctx: &Ctx) -> Result<SandboxOutput, ToolError>;

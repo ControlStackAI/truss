@@ -120,6 +120,7 @@ impl std::fmt::Display for McpServerError {
 
 impl std::error::Error for McpServerError {}
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait TrussMcpBackend: Send + Sync + 'static {
     async fn run_contract(

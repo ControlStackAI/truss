@@ -193,6 +193,7 @@ pub enum StreamEvent {
 }
 
 /// Implement this once per backend.
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait Provider: Send + Sync {
     fn name(&self) -> &str;

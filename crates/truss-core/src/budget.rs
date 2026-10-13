@@ -224,7 +224,7 @@ impl BudgetMeter {
 fn record_step_with_limit(counter: &AtomicU64, limit: Option<u64>) {
     match limit {
         Some(max) => {
-            let _ = counter.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
+            let _ = counter.try_update(Ordering::Relaxed, Ordering::Relaxed, |current| {
                 (current < max).then_some(current + 1)
             });
         }

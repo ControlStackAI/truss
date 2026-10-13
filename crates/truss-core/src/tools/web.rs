@@ -45,6 +45,7 @@ pub struct WebFetchResponse {
     pub body: Vec<u8>,
 }
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait WebHttpTransport: Send + Sync {
     async fn get(&self, url: &str, max_bytes: usize) -> Result<WebFetchResponse, ToolError>;
@@ -57,6 +58,7 @@ pub struct WebSearchResult {
     pub snippet: String,
 }
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait WebSearchProvider: Send + Sync {
     async fn search(&self, query: &str, limit: usize) -> Result<Vec<WebSearchResult>, ToolError>;

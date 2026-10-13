@@ -40,6 +40,7 @@ use crate::error::ToolError;
 use crate::memory::{LedgerRef, MemoryConfig};
 use crate::provider::{Provider, ToolDef};
 
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait Tool: Send + Sync {
     /// The schema advertised to the model.
