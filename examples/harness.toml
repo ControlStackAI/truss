@@ -1,0 +1,103 @@
+# Example truss config. Pass with `--config harness.toml`.
+# CLI flags override anything set here.
+
+[provider]
+kind = "anthropic"            # "anthropic" | "openai"
+model = "claude-opus-4-8"
+# base_url = "http://localhost:11434/v1"   # e.g. Ollama for kind = "openai"
+# api_key_env = "ANTHROPIC_API_KEY"        # defaults per provider kind
+
+[agent]
+system = "You are a precise engineering assistant. Prefer tools over guessing."
+max_tokens = 4096
+max_steps = 24
+# reasoning = "high"   # minimal | low | medium | high (models that support thinking)
+# temperature = 0.2
+# [agent.memory] overrides [memory] for this agent.
+
+[memory]
+# store_backend = "sqlite"       # sqlite | ai_memory
+# ai_memory_socket = "/run/user/1000/ai-memory.sock" # required for ai_memory
+# recall = "exact"              # exact | semantic | hybrid
+# embedding_backend = "open-ai" # open-ai | deterministic
+# embedding_model = "text-embedding-3-small"
+# embedding_api_key_env = "OPENAI_API_KEY"
+# embedding_dims = 1536
+# embedding_base_url = "https://api.openai.com/v1" # optional OpenAI-compatible endpoint
+# verification = "lazy"          # off | lazy | eager | tiered
+# identity = "propose"           # locked | propose | self_amend
+# scope = "per-agent"            # per-agent | per-project | shared
+# conflict = "verified-wins"     # verified-wins | latest-wins | panel-arbitrated | keep-both-flagged
+# goal_repin_every = 8           # re-inject active contract intent + DoD every N model steps
+# salience = "off"               # off | harness-recency | model-scored | hybrid (M5 seam; no eviction yet)
+
+# Context projection keeps the cached L0/L1 prefix stable and compacts only
+# non-exempt message history when enabled. keep_tail = 0 preserves legacy behavior.
+# [memory.projection]
+# keep_tail = 0
+# compaction_exempt_tiers = ["l0_core", "l0_self", "l1_principal", "l3_goal"]
+
+# Governed compaction is opt-in. When enabled, Truss compacts only at run-step
+# boundaries and records a signed compaction_performed journal entry.
+# [memory.compaction]
+# mode = "off"                 # off | summarize | evict
+# threshold = 0.70
+# min_tail = 6
+# anticipate = false
+# exempt_tiers = ["l0_core", "l0_self", "l1_principal", "l3_goal"]
+
+[budget]
+max_cost_usd = 2.00
+max_total_tokens = 500000
+max_steps = 40
+
+# Native memory/git/GitHub/web tools are opt-in and still obey
+# [policy].allow_tools. Network policy also gates web tools.
+[tools]
+memory = false
+git = false
+github = false
+web = false
+
+# Brave Search is the first concrete web_search backend. Leave the key out of
+# config; point at the env var that holds it.
+# [tools.web_search]
+# endpoint = "https://api.search.brave.com/res/v1/web/search"
+# api_key_env = "TRUSS_WEB_SEARCH_API_KEY"
+
+# Approval gates are opt-in. When enabled, gated durable runs suspend until a
+# signed approved human_review releases them.
+# [approval_gates]
+# enabled = false
+# high_risk_tools = ["bash", "write_file", "mcp:payments:*"]
+# spend_threshold_usd = 1.00
+# per_call_spend_threshold_usd = 0.25
+
+[policy]
+write_scope = ["/home/you/project"]
+read_scope = ["/home/you/project"]
+network = "none"             # "none" | "open" | "allowlist"
+# allowlist = ["example.com", "api.search.brave.com"]
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", ":(){", "git push"]
+
+# MCP servers can be mounted globally or per contract. Stdio is default.
+#
+# [[mcp.servers]]
+# name = "demo"
+# transport = "stdio"
+# command = "python3"
+# args = ["examples/fake-mcp-server.py"]
+# allow_tools = ["echo"]
+#
+# HTTP MCP transport is available when built with `--features mcp-http`.
+# Secret header values should come from env vars; they are not journaled.
+#
+# [[mcp.servers]]
+# name = "remote"
+# transport = "http"
+# url = "https://mcp.example.com/rpc"
+# allow_tools = ["search"]
+#
+# [mcp.servers.env_headers]
+# "authorization" = "REMOTE_MCP_AUTH_HEADER"

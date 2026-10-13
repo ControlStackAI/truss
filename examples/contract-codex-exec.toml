@@ -1,0 +1,45 @@
+# OpenAI subscription via the DELEGATED path (ADR 0003, Tier 2) — uses the `codex`
+# CLI's own ChatGPT login. No API key, no token replay by Truss; `codex` owns the
+# inner loop and Truss verifies the result at the contract boundary.
+#
+#   truss --contract contract-codex-exec.toml
+#
+# Compare with `--provider openai-codex` (Tier 1, in-process), which drives Truss's
+# OWN loop on the same subscription — better for dev/testing. This delegated path is
+# the safer production answer for OpenAI subscriptions.
+#
+# Prereq: `codex` on PATH and signed in with ChatGPT (`codex` → Sign in).
+
+reviewers = 3
+
+[contract]
+id = "demo-greeting-codex-exec-0001"
+title = "Write a greeting file (via codex on a ChatGPT subscription)"
+intent = """
+Create a file named greeting.txt in the working directory whose contents are
+exactly the line: hello from the harness
+"""
+
+[executor]
+kind = "delegated-cli"
+command = "codex"
+# `codex exec` is the non-interactive, one-shot mode; prompt arrives on stdin.
+args = ["exec", "--skip-git-repo-check"]
+# Stripped so the CLI uses its stored ChatGPT login, not a key Truss is holding.
+clear_env = ["OPENAI_API_KEY", "OPENAI_BASE_URL"]
+prompt_via = "stdin"
+
+[[done]]
+kind = "check"
+desc = "greeting.txt exists and contains the exact line"
+run = "cat greeting.txt"
+expect_exit = 0
+expect_contains = ["hello from the harness"]
+
+[[done]]
+kind = "review"
+desc = "the greeting reads naturally and matches the intent"
+
+[budget]
+max_cost_usd = 1.00
+max_steps = 12

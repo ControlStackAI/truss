@@ -1,0 +1,36 @@
+# Example MCP contract. The MCP server is scoped to this contract and its
+# mounted tool must also appear in [constraints].allow_tools.
+
+reviewers = 1
+
+[contract]
+id = "demo-mcp-0001"
+title = "Use a scoped MCP tool"
+intent = """
+Use the scoped MCP echo tool to produce a short greeting, then write it to
+mcp-greeting.txt.
+"""
+
+[[mcp.servers]]
+name = "demo"
+command = "python3"
+args = ["examples/fake-mcp-server.py"]
+allow_tools = ["echo"]
+
+[[done]]
+kind = "check"
+desc = "mcp-greeting.txt contains the MCP-produced greeting"
+run = "cat mcp-greeting.txt"
+expect_exit = 0
+expect_contains = ["hello from mcp"]
+
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash", "mcp:demo:echo"]
+forbidden = ["rm -rf /", "git push"]
+system = "Use the MCP tool if it helps. Write only the requested file."

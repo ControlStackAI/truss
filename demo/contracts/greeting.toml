@@ -1,0 +1,46 @@
+# Example contract. Run with: truss --contract contract.toml --tools
+#
+# The executor does the work; the harness then INDEPENDENTLY verifies it —
+# `check` clauses are shell commands the harness runs, `review` clauses are
+# judged by a no-stake reviewer model. You read the verdict, not the transcript.
+
+[contract]
+id = "demo-greeting-0001"
+title = "Write a greeting file"
+intent = """
+Create a file named greeting.txt in the working directory whose contents are
+exactly the line: hello from the harness
+"""
+
+# ── Definition of done ────────────────────────────────────────────────
+[[done]]
+kind = "check"
+desc = "greeting.txt exists and contains the exact line"
+run = "cat greeting.txt"
+expect_exit = 0
+expect_contains = ["hello from the harness"]
+
+[[done]]
+kind = "check"
+desc = "no stray files were created outside the contract"
+run = "test -f greeting.txt && echo ok"
+expect_exit = 0
+expect_contains = ["ok"]
+
+[[done]]
+kind = "review"
+desc = "the greeting reads naturally and matches the intent"
+# reviewer_context = ["greeting.txt"]
+
+# ── Budget (hard ceilings) ────────────────────────────────────────────
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+# ── Constraints (enforced) ────────────────────────────────────────────
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", "git push"]
+system = "You are a careful engineer. Use the tools to complete the task, then stop."

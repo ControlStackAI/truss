@@ -1,0 +1,38 @@
+[package]
+name = "truss-cli"
+description = "Truss command-line interface — the `truss` binary."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "truss"
+path = "src/main.rs"
+
+[features]
+default = ["provider-anthropic", "provider-openai"]
+provider-anthropic = ["truss-providers/provider-anthropic"]
+provider-openai = ["truss-providers/provider-openai"]
+provider-openai-codex = ["truss-providers/provider-openai-codex"]
+mcp-http = ["truss-core/mcp-http"]
+swebench-live = ["dep:truss-bench", "truss-bench/swebench-live"]
+# Read-only interactive review TUI (VR-2). Off by default so headless/CI and
+# `--no-default-features` builds never pull in ratatui/crossterm.
+tui = ["dep:ratatui", "dep:crossterm"]
+
+[dependencies]
+truss-core = { workspace = true }
+truss-providers = { workspace = true }
+truss-bench = { workspace = true, optional = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+toml = "0.8"
+hex = "0.4"
+ratatui = { workspace = true, optional = true }
+crossterm = { workspace = true, optional = true }

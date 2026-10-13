@@ -1,0 +1,43 @@
+# Truss — Cargo workspace (ADR 0001, Phase 1).
+#
+# Four crates enforce the plugin and testing-tool boundaries physically:
+#   truss-core      — the provider-agnostic runtime (durable execution, signed
+#                     ledger, verified delegation). Cannot depend on a vendor.
+#   truss-providers — the HTTP model backends (Anthropic, OpenAI) + shared helpers,
+#                     feature-gated; pulls in `reqwest` only when a backend is enabled.
+#                     truss-core uses `reqwest` for native web tools and remote
+#                     MCP HTTP transport.
+#   truss-cli       — the `truss` binary + TOML config wiring.
+#   truss-bench     — benchmark and simulated-user testing tooling. Not shipped
+#                     in the runtime/CLI core path.
+[workspace]
+resolver = "2"
+members = [
+    "crates/truss-core",
+    "crates/truss-providers",
+    "crates/truss-cli",
+    "crates/truss-bench",
+]
+
+[workspace.package]
+version = "0.58.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/ControlStackAI/truss"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "process", "signal", "time", "sync", "io-util", "io-std"] }
+tokio-util = "0.7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+# Optional TUI stack for truss-cli's `tui` feature (off by default so headless/CI
+# builds stay lean and `--no-default-features` does not pull these in).
+ratatui = "0.28"
+crossterm = "0.28"
+truss-core = { path = "crates/truss-core" }
+truss-providers = { path = "crates/truss-providers", default-features = false }
+truss-bench = { path = "crates/truss-bench" }

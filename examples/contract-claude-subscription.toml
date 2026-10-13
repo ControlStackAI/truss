@@ -1,0 +1,66 @@
+# Delegated-executor contract (ADR 0003, Tier 2) — run the work on a Claude
+# *subscription* instead of an API key, then verify it the same way.
+#
+#   truss --contract contract-claude-subscription.toml
+#
+# How it differs from contract.toml: the executor doesn't drive a Provider we own.
+# It shells out to the real `claude` CLI in print mode (`-p`). We CLEAR the Anthropic
+# key/OAuth env vars from the child, so the CLI falls back to its OWN stored
+# Claude Pro/Max login — Truss replays no tokens (ToS-clean). Claude Code runs its
+# own inner loop/tools; Truss captures the result and verifies it at the contract
+# boundary with independent `check` clauses + the reviewer panel, then signs the
+# verdict. You still review a proof, not a transcript.
+#
+# Prereq: `claude` on PATH and already logged in (`claude` → /login once).
+
+reviewers = 3
+
+[contract]
+id = "demo-greeting-claude-sub-0001"
+title = "Write a greeting file (on a Claude subscription)"
+intent = """
+Create a file named greeting.txt in the working directory whose contents are
+exactly the line: hello from the harness
+"""
+
+# ── Execute via the Claude CLI on its own subscription (no API key) ───────────
+[executor]
+kind = "delegated-cli"
+command = "claude"
+# Print mode = one-shot; pin the live subscription model because the Claude CLI
+# default can move to aliases unavailable on this account.
+args = [
+  "-p",
+  "--model",
+  "claude-opus-4-8",
+  "--output-format",
+  "text",
+  "--permission-mode",
+  "acceptEdits",
+]
+# Stripped from the child so the CLI uses its stored subscription login, not a key.
+clear_env = [
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_OAUTH_TOKEN",
+  "CLAUDE_CODE_OAUTH_TOKEN",
+]
+prompt_via = "stdin"   # pipe the task prompt to the CLI's stdin (default)
+
+# ── Definition of done — verified by Truss, independently of the executor ─────
+[[done]]
+kind = "check"
+desc = "greeting.txt exists and contains the exact line"
+run = "cat greeting.txt"
+expect_exit = 0
+expect_contains = ["hello from the harness"]
+
+[[done]]
+kind = "review"
+desc = "greeting.txt contains exactly one line, `hello from the harness`, with no extra text"
+reviewer_context = ["greeting.txt"]
+
+# ── Budget + constraints (the reviewer panel still runs on your normal provider) ─
+[budget]
+max_cost_usd = 1.00
+max_steps = 12

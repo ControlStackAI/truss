@@ -1,0 +1,34 @@
+# Demo contract — the happy path. The executor writes the script; Truss runs it
+# to verify, and a no-stake reviewer judges it. Expected verdict: PASS.
+
+[contract]
+id = "squares-0001"
+title = "Print the first five squares"
+intent = """
+Create a file squares.py in the working directory that, when run with `python3
+squares.py`, prints the squares of the numbers 1 through 5 on one line, separated
+by single spaces, exactly: 1 4 9 16 25
+"""
+
+[[done]]
+kind = "check"
+desc = "running squares.py prints the five squares"
+run = "python3 squares.py"
+expect_exit = 0
+expect_contains = ["1 4 9 16 25"]
+
+[[done]]
+kind = "review"
+desc = "the script is clean and faithfully matches the intent"
+reviewer_context = ["squares.py"]
+
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", "git push"]
+system = "You are a careful engineer. Use the tools to write the file, then stop."

@@ -1,0 +1,1 @@
+{"instance_id":"fake-repo__fake-string-lists","repo":"fake/repo","base_commit":"0000000000000000000000000000000000000000","problem_statement":"Change answer.txt so the fixture grader sees the fixed answer.","patch":"","test_patch":"","FAIL_TO_PASS":"[\"check.sh\", \"tests/test_answer.py::test_answer\"]","PASS_TO_PASS":"[\"tests/test_existing.py\"]","version":"fake"}

@@ -1,0 +1,20 @@
+[book]
+title = "Truss Documentation"
+authors = ["ControlStackAI"]
+description = "Architecture, configuration, examples, and decision records for the Truss agentic harness."
+language = "en"
+src = "."
+
+[build]
+build-dir = "../book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/ControlStackAI/truss"
+edit-url-template = "https://github.com/ControlStackAI/truss/edit/main/docs/{path}"
+site-url = "/truss/"
+default-theme = "rust"
+preferred-dark-theme = "navy"
+
+[output.html.search]
+enable = true

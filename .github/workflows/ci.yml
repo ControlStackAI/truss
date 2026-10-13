@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  # Note: `-D warnings` is scoped to the clippy steps (not a global RUSTFLAGS) so a
+  # warning in a third-party dependency can't fail our CI.
+
+jobs:
+  test:
+    name: fmt · clippy · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      # Whole workspace, all providers on.
+      - name: Clippy (workspace)
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Test (workspace)
+        run: cargo test --workspace --all-features
+
+      # Enforce the boundary: the core compiles standalone (no providers, no
+      # reqwest), and the providers crate builds with neither backend enabled.
+      - name: Build truss-core (vendor-free)
+        run: cargo build -p truss-core
+      - name: Build truss-providers (no providers)
+        run: cargo build -p truss-providers --no-default-features

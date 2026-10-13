@@ -1,0 +1,36 @@
+# Contract example showing governed compaction enabled at the contract layer.
+# Run with: truss --contract examples/contract-compaction.toml --tools
+
+reviewers = 1
+
+[memory.compaction]
+mode = "summarize"
+threshold = 0.70
+min_tail = 6
+anticipate = false
+
+[contract]
+id = "demo-compaction-0001"
+title = "Summarize at context pressure"
+intent = """
+Create a file named compaction-demo.txt in the working directory whose contents
+are exactly the line: governed compaction is opt-in
+"""
+
+[[done]]
+kind = "check"
+desc = "compaction-demo.txt contains the expected line"
+run = "cat compaction-demo.txt"
+expect_exit = 0
+expect_contains = ["governed compaction is opt-in"]
+
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", "git push"]
+system = "You are a careful engineer. Use the tools to complete the task, then stop."

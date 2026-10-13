@@ -1,0 +1,7 @@
+/target
+/book/
+**/*.rs.bk
+.env
+harness-identity.key
+*.db
+*.key

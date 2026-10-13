@@ -1,0 +1,38 @@
+# Demo contract — the "money moment". The intent tells the agent to print squares
+# of 1..5, which it will do and declare success. But the human's REAL acceptance
+# bar (the check) wanted SIX values. The agent's confidence and even a rubber-stamp
+# reviewer don't matter — Truss runs the real check and FAILS it.
+#
+# This is the whole thesis: the definition-of-done is the source of truth, not the
+# agent's self-assessment. Expected verdict: FAIL.
+
+[contract]
+id = "squares-trap-0002"
+title = "Print squares (acceptance bar is higher than the agent thinks)"
+intent = """
+Create a file squares.py that, when run with `python3 squares.py`, prints the
+squares of the numbers 1 through 5 on one line separated by spaces.
+"""
+
+[[done]]
+kind = "check"
+desc = "output includes the squares of 1 through SIX (the real requirement)"
+run = "python3 squares.py"
+expect_exit = 0
+expect_contains = ["1 4 9 16 25 36"]   # 36 = 6² — the agent printed only up to 25
+
+[[done]]
+kind = "review"
+desc = "looks complete"
+reviewer_context = ["squares.py"]
+
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", "git push"]
+system = "You are a careful engineer. Use the tools to write the file, then stop."

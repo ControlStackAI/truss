@@ -1,0 +1,60 @@
+# Example contract. Run with: ./target/release/truss --contract examples/contract.toml --tools
+#
+# The executor does the work; the harness then INDEPENDENTLY verifies it —
+# `check` clauses are shell commands the harness runs, `review` clauses are
+# judged by a panel of no-stake reviewer models. You read the verdict, not the
+# transcript.
+
+# Size of the adversarial reviewer panel: N reviewers judge each `review` clause
+# in parallel (each from a different lens) and a strict majority must agree it's
+# met. 1 = single reviewer. CLI `--reviewers` overrides this.
+reviewers = 3
+
+[memory]
+# Contract-level overrides layer after global [memory] and [agent.memory].
+# verification = "eager"
+# identity = "propose"
+# scope = "per-project"
+# conflict = "verified-wins"
+# goal_repin_every = 8
+# salience = "off"
+
+[contract]
+id = "demo-greeting-0001"
+title = "Write a greeting file"
+intent = """
+Create a file named greeting.txt in the working directory whose contents are
+exactly the line: hello from the harness
+"""
+
+# ── Definition of done ────────────────────────────────────────────────
+[[done]]
+kind = "check"
+desc = "greeting.txt exists and contains the exact line"
+run = "printf 'hello from the harness\\n' | cmp - greeting.txt"
+expect_exit = 0
+
+[[done]]
+kind = "check"
+desc = "greeting.txt exists"
+run = "test -f greeting.txt && echo ok"
+expect_exit = 0
+expect_contains = ["ok"]
+
+[[done]]
+kind = "review"
+desc = "the greeting reads naturally and matches the intent"
+# reviewer_context = ["greeting.txt"]
+
+# ── Budget (hard ceilings) ────────────────────────────────────────────
+[budget]
+max_cost_usd = 1.00
+max_steps = 12
+
+# ── Constraints (enforced) ────────────────────────────────────────────
+[constraints]
+write_scope = ["."]
+network = "none"
+allow_tools = ["read_file", "write_file", "list_dir", "bash"]
+forbidden = ["rm -rf /", "git push"]
+system = "You are a careful engineer. Use the tools to complete the task, then stop."
