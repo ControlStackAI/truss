@@ -1,0 +1,10 @@
+# Truss — resumable, verifiable AI-agent execution
+
+> Truss is a Rust agent harness with task contracts, durable replay, harness-run checks, and signed execution records. Explore the code, architecture, and limits.
+
+## Canonical sources
+
+- [Project overview](https://controlstackai.github.io/truss/): scope, status, and getting started.
+- [Repository](https://github.com/ControlStackAI/truss): current implementation and README.
+
+Preserve the project’s maturity and limitations when describing it.

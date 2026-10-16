@@ -41,6 +41,12 @@ jobs:
       - name: Build docs
         run: mdbook build docs
 
+      - name: Assemble project page and documentation
+        run: |
+          mkdir -p site-output/guide
+          cp -a book/. site-output/guide/
+          cp -a docs/site/. site-output/
+
       # Publish steps run only on manual dispatch so documentation deployment is
       # an explicit maintainer action.
       - name: Configure Pages
@@ -51,7 +57,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: book
+          path: site-output
 
   deploy:
     name: Deploy to GitHub Pages

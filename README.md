@@ -1,5 +1,7 @@
 # Truss
 
+[Website](https://controlstackai.github.io/truss/) · [Documentation](https://controlstackai.github.io/truss/guide/)
+
 **A Rust agent harness for work you can resume, inspect, and verify.**
 
 [![CI](https://github.com/ControlStackAI/truss/actions/workflows/ci.yml/badge.svg)](https://github.com/ControlStackAI/truss/actions/workflows/ci.yml)
